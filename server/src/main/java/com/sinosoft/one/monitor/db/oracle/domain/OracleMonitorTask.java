@@ -20,7 +20,7 @@ import java.util.concurrent.*;
  * Time: 下午4:37
  */
 @Component
-@Lazy(false)
+//@Lazy(false)   modified by hanchunliang 暂时取消oracle监控作业  14-02-14 001
 public class OracleMonitorTask {
     @Autowired
     private  InfoRepository infoRepository;
@@ -41,7 +41,7 @@ public class OracleMonitorTask {
     /**
      * Spring注入该类后执行该方法
      */
-    @PostConstruct
+//    @PostConstruct     modified by hanchunliang 暂时取消oracle监控作业  14-02-14 001
     public  void execute(){
         logger.info("启动Oracle监视器...");
         List<Info> infoList = (List<Info>) infoRepository.findAll();
