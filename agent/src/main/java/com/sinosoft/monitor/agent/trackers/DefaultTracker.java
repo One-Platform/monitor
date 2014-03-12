@@ -1,11 +1,14 @@
 package com.sinosoft.monitor.agent.trackers;
 
+import com.sinosoft.monitor.agent.JavaAgent;
 import com.sinosoft.monitor.agent.instrumentation.interceptor.ComponentNames;
 import com.sinosoft.monitor.agent.trackers.method.arguments.ArgsPropertyFilter;
 import com.sinosoft.monitor.agent.trackers.store.InvalidTypeStore;
 import com.sinosoft.monitor.com.alibaba.fastjson.JSONArray;
 import com.sinosoft.monitor.com.alibaba.fastjson.serializer.SerializerFeature;
 
+import java.text.MessageFormat;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DefaultTracker extends AbstractTracker
@@ -23,8 +26,6 @@ public class DefaultTracker extends AbstractTracker
 
 	protected String exceptionDescription;
 	protected String exceptionStackTrace;
-
-    private static Logger logger = Logger.getLogger(DefaultTracker.class.getName());
 
 	/**
 	 * 为除去filter，servlet，jsp等方法调用的构造方法
@@ -45,8 +46,9 @@ public class DefaultTracker extends AbstractTracker
                         ArgsPropertyFilter.getInstence(),
                         SerializerFeature.QuoteFieldNames,
                         SerializerFeature.SkipTransientField) : "";
+                JavaAgent.logger.info(MessageFormat.format("[methodParams:{0}]",this.methodParams));
             }catch (Throwable throwable){
-                logger.severe("agent端数据传输室参数转JSON出错..");
+                JavaAgent.logger.severe("agent准备据传输，方法参数转JSON出错..");
                 InvalidTypeStore.synchronizedLocalFile();
             }
 
@@ -116,8 +118,19 @@ public class DefaultTracker extends AbstractTracker
 
 	protected void quit(Object returnValue) {
 //		this.returnValue = new JSONArray(Arrays.asList(returnValue));
-
-		this.endTime = System.currentTimeMillis();
+        try {
+            this.returnValue = returnValue != null ? JSONArray.toJSONString(returnValue,
+                    ArgsPropertyFilter.getInstence(),
+                    SerializerFeature.QuoteFieldNames,
+                    SerializerFeature.SkipTransientField) : "";
+            if (!"".equals(this.returnValue)){
+                JavaAgent.logger.info(MessageFormat.format("[methodReturns:{0}]",this.returnValue));
+            }
+        } catch (Throwable t){
+            JavaAgent.logger.severe("agent准备据传输，方法返回值转JSON出错..");
+            InvalidTypeStore.synchronizedLocalFile();
+        }
+        this.endTime = System.currentTimeMillis();
 		this.duration = ((int) (this.endTime - this.startTime));
 	}
 

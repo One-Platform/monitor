@@ -58,7 +58,7 @@ public class HttpRequest {
 		return (String) m.invoke(this.request, new Object[0]);
 	}
 
-	public Map<String, String> getParameterMap()
+	public Map<String, Object> getParameterMap()
 			throws Exception {
 		String methodName = "getParameterMap";
 		Method m = (Method) this.methodCache.get(methodName);
@@ -66,7 +66,8 @@ public class HttpRequest {
 			m = this.requestClass.getMethod(methodName, new Class[0]);
 			this.methodCache.put(methodName, m);
 		}
-		return (Map) m.invoke(this.request, new Object[0]);
+        Map<String, Object> parameterMap = (Map) m.invoke(this.request, new Object[0]);
+		return parameterMap;
 	}
 
 	public String getHeader(String name)
