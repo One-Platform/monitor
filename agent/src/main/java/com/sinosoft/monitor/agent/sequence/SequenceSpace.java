@@ -32,6 +32,13 @@ public final class SequenceSpace {
 
     private static Map<String,String> servletCharsetMap = JavaAgent.getInstance().getAgentConfig().getServletCharsetMap();
 
+    private static boolean needEncoding = false;
+    static {
+          if (servletCharsetMap!=null&&servletCharsetMap.size()>0){
+              needEncoding = true;
+          }
+    }
+
     public long getSize(){
         return count;
     }
@@ -108,7 +115,7 @@ public final class SequenceSpace {
 				RootTracker rootTracker = (RootTracker) tracker;
 
                 //新增转码 start
-                if (rootTracker.getClass()==HttpRequestTracker.class){
+                if (needEncoding && rootTracker.getClass()==HttpRequestTracker.class){
                     //获取待转换字符编码
                     String charset = getCharset(rootTracker.getChildTrackers());
 

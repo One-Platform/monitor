@@ -38,7 +38,7 @@ public class ResourcesCache {
 		try {
 			return resourcesCache.get(resourceId);
 		} catch (ExecutionException e) {
-//			logger.warn("get resource exception :" + e.getMessage());
+			logger.warn("get resource exception :" + e.getMessage());
 			return Resource.EMPTY;
 		}
 	}

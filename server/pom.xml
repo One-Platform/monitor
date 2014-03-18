@@ -241,7 +241,7 @@
 				<configuration>
 					<uriEncoding>UTF-8</uriEncoding>
 					<path>/monitor</path>
-                    <port>8082</port>
+                    <port>8080</port>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -35,6 +35,9 @@
             if(_data.length<=0){
                 return  $('#'+_id).html("暂无数据");
             }
+            for(var i=0;i<_data.length;i++){
+                _data[_data.length-i-1].index = i+1;
+            }
             $('#'+_id).html("");
             new Highcharts.Chart({
                 chart: {
@@ -134,7 +137,7 @@
             var exceptionBarData =  _data.exceptionData;
             var alarmBarData =  _data.alarmData;
             refreshBar('urlVisitBar','Top20 URL访问次数','访问数（次）',' 次',visitBarData);
-            refreshBar('urlResponseBar','Top20 URL最慢相应时间','相应时间（ms）',' ms',responseBarData);
+            refreshBar('urlResponseBar','Top20 URL最慢响应时间','响应时间（ms）',' ms',responseBarData);
             refreshBar('urlExceptionBar','Top20 URL异常次数','异常数（次）',' 次',exceptionBarData);
             refreshBar('urlAlarmBar','Top20 URL告警次数','告警数（次）',' 次',alarmBarData);
             //刷啊新grade
@@ -189,19 +192,17 @@
 
             $("#statistics_grid").html("");
             var title = '<tr>'+
-                    '<td align="center" width="5">序号</td>'+
-                    '<td align="left" width="65">URL</td>'+
-                    '<td align="left" width="9">访问次数</td>'+
-                    '<td align="left" width="9">平均相应时间</td>'+
-                    '<td align="left" width="9">告警次数</td>'+
+                    '<td align="left" width="70%">URL</td>'+
+                    '<td align="center" width="10%">访问次数</td>'+
+                    '<td align="center" width="10%">平均响应时间</td>'+
+                    '<td align="center" width="10%">告警次数</td>'+
                     '</tr>';
             if(_data.length<= 0 ){
                 var row_1 =  '<tr>'+
-                        '<td align="center" width="5">暂无数据</td>'+
-                        '<td align="left" width="65">暂无数据</td>'+
-                        '<td align="left" width="9">暂无数据</td>'+
-                        '<td align="left" width="9">暂无数据</td>'+
-                        '<td align="left" width="9">暂无数据</td>'+
+                        '<td align="left" width="70%">暂无数据</td>'+
+                        '<td align="center" width="10%">暂无数据</td>'+
+                        '<td align="center" width="10%">暂无数据</td>'+
+                        '<td align="center" width="10%">暂无数据</td>'+
                         '</tr>';
                 $("#statistics_grid").append(title);
 //                $("#statistics_grid").append(row_1);
@@ -210,11 +211,10 @@
             $("#statistics_grid").append(title);
             for(var i in _data){
                 var rowHtml =  '<tr>'+
-                        '<td align="center" width="5">'+_data[i].index+'</td>'+
-                        '<td align="left" width="65">'+_data[i].url+'</td>'+
-                        '<td align="left" width="9">'+_data[i].visit+'</td>'+
-                        '<td align="left" width="9">'+_data[i].responseTime+'</td>'+
-                        '<td align="left" width="9">'+_data[i].alarm+'</td>'+
+                        '<td align="left" width="70%">'+_data[i].url+'</td>'+
+                        '<td align="center" width="10%">'+_data[i].visit+'</td>'+
+                        '<td align="center" width="10%">'+_data[i].responseTime+'</td>'+
+                        '<td align="center" width="10%">'+_data[i].alarm+'</td>'+
                         '</tr>';
                 $("#statistics_grid").append(rowHtml);
             }
@@ -237,7 +237,7 @@
                 <input id="startTime" type="text" value="" class="ui_timepicker" />&nbsp;至&nbsp;
                 <input id="endTime" type="text" value=""/>
                 <input onclick="search();" type="button" value="查询" class="ui_timepicker"/>
-                <input type="button" value="导出PDF"/>
+                <%--<input type="button" value="导出PDF"/>--%>
             </strong>
                 报表统计
             </h2>
@@ -268,10 +268,9 @@
             <h3 class="title3">统计列表</h3>
             <table id='statistics_grid' width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                    <td align="center" width="5">序号</td>
-                    <td align="left" width="65">URL</td>
+                    <td align="left" width="70">URL</td>
                     <td align="left" width="9">访问次数</td>
-                    <td align="left" width="9">平均相应时间</td>
+                    <td align="left" width="9">平均响应时间</td>
                     <td align="left" width="9">告警次数</td>
                 </tr>
             </table>

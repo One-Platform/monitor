@@ -87,7 +87,12 @@ public class ApplicationUrlExportService {
                 avgResponseTime = totalTime/visitCount;
             }
             urlStatisticsModel.setResponseTime(avgResponseTime);
-            long alarmCount = urlStatisticsModel.getAlarmCount();
+            //update by hanchunliang 2014-02-13
+//            long alarmCount = urlStatisticsModel.getAlarmCount();
+            Long alarmCount = alarmMap.get(urlStatisticsModel.getUrlName());
+            if (alarmCount==null){
+                alarmCount = 0L;
+            }
             urlStatisticsModel.setAlarmCount(alarmCount);
             urlStatisticsModel.setIndex(index++);
         }

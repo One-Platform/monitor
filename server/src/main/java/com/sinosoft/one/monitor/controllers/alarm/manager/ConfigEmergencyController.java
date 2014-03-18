@@ -159,9 +159,17 @@ public class ConfigEmergencyController {
                     dbAttributeAction=attributeActionRepository.findByResourceIdAndAttributeId(monitorId,attribute.getId());
                     if(dbAttributeAction!=null&&dbAttributeAction.size()>0){
                         for(AttributeAction attributeAction:dbAttributeAction){
+                            /**    modified by hanchunliang 2014-02-17 空指针问题
                             String newActonName=mailActionRepository.findOne(attributeAction.getActionId()).getName();
                             if(!actionNames.contains(newActonName)){
                                 actionNames.add(newActonName);
+                            }           **/
+                            MailAction mailAction = mailActionRepository.findOne(attributeAction.getActionId());
+                            if (mailAction!=null){
+                                String newActonName=mailAction.getName();
+                                if(!actionNames.contains(newActonName)){
+                                    actionNames.add(newActonName);
+                                }
                             }
                         }
                         StringBuffer stringBuffer=new StringBuffer();
