@@ -8,8 +8,6 @@ import com.sinosoft.monitor.com.alibaba.fastjson.JSONArray;
 import com.sinosoft.monitor.com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.text.MessageFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class DefaultTracker extends AbstractTracker
 		implements ComponentNames {
@@ -26,6 +24,8 @@ public class DefaultTracker extends AbstractTracker
 
 	protected String exceptionDescription;
 	protected String exceptionStackTrace;
+
+    protected String oneMAgentKey;
 
 	/**
 	 * 为除去filter，servlet，jsp等方法调用的构造方法
@@ -78,9 +78,17 @@ public class DefaultTracker extends AbstractTracker
 		this.methodParams = null;
 	}
 
+    @Override
+    public void setOneMAgentKey(String oneMAgentKey){
+        this.oneMAgentKey = oneMAgentKey;
+    }
 
+    @Override
+    public String getOneMAgentKey() {
+        return this.oneMAgentKey;
+    }
 
-	public long getStartTime() {
+    public long getStartTime() {
 		return this.startTime;
 	}
 

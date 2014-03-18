@@ -11,6 +11,7 @@ import com.sinosoft.monitor.agent.store.model.url.UrlTraceLog;
 import com.sinosoft.monitor.agent.trackers.AbstractRootTracker;
 import com.sinosoft.monitor.agent.trackers.DefaultTracker;
 import com.sinosoft.monitor.agent.trackers.Tracker;
+import com.sinosoft.monitor.agent.util.AgentKeyUtil;
 import com.sinosoft.monitor.agent.util.UUIDUtil;
 
 import java.sql.Timestamp;
@@ -20,6 +21,8 @@ import java.util.List;
 public class BackgroundRootTracker extends AbstractRootTracker {
 	public BackgroundRootTracker(String className, String methodName, Object thiz, Object[] args) {
 		super(className, methodName, thiz, args);
+        //rootTracker 创建ONE_M_KEY
+        super.setOneMAgentKey(AgentKeyUtil.createOneMAgentKey());
 	}
 
 	public String assignSequenceName() {

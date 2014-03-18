@@ -86,8 +86,20 @@ public class UrlTraceLog implements Serializable {
 	 */
 	private boolean hasException;
 
+    /**
+     * 监控生产戳
+     */
+    private String oneMAgentKey;
+
 	List<MethodTraceLog> methodTraceLogList = new ArrayList<MethodTraceLog>();
 
+    public String getOneMAgentKey() {
+        return oneMAgentKey;
+    }
+
+    public void setOneMAgentKey(String oneMAgentKey) {
+        this.oneMAgentKey = oneMAgentKey;
+    }
 
     public String getUserIp() {
         return userIp;
