@@ -47,7 +47,11 @@ public class HttpRequestTracker extends AbstractRootTracker {
 			uri = SequenceURINormalizer.normalizeURI(request.getRequestURI());
 
             //rootTracker 创建ONE_M_KEY
-            String oneMAgentKey = genericOneMAgentKey(request.getHeader(AgentKeyUtil.ONE_M_AGENT_KEY));
+            String oneMAgentKey = request.getHeader(AgentKeyUtil.ONE_M_AGENT_KEY);
+
+            JavaAgent.logger.log(Level.INFO,"Request received _one_agent_key_:{0}",oneMAgentKey);
+
+            oneMAgentKey = genericOneMAgentKey(oneMAgentKey);
 
             setOneMAgentKey(oneMAgentKey);
 
@@ -150,7 +154,7 @@ public class HttpRequestTracker extends AbstractRootTracker {
                 jsonStr = JSON.toJSONString(requestParamMap);
             }
 			urlTrace.setRequestParams(jsonStr);
-            JavaAgent.logger.info(MessageFormat.format("[url:{0},param:{1}]",seqName,jsonStr));
+            JavaAgent.logger.info(MessageFormat.format("[url:{0},param:{1},setOneMAgentKey:{2}]",seqName,jsonStr,this.getOneMAgentKey()));
 			urlTrace.setSessionId(sessionId);
 			urlTrace.setUserIp(requestIp);
 

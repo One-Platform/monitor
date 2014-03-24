@@ -5,6 +5,7 @@ import com.sinosoft.monitor.agent.config.JavaAgentConfig;
 import com.sinosoft.monitor.agent.tracing.TrackerService;
 import com.sinosoft.monitor.agent.trackers.*;
 import com.sinosoft.monitor.agent.trackers.http.HttpRequestTracker;
+import com.sinosoft.monitor.agent.util.AgentKeyUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -128,6 +129,8 @@ public final class SequenceSpace {
 
                 rootTracker.computeFrictionTime((int) (System.currentTimeMillis() - this.workTime));
                 TrackerStore.add(rootTracker);
+                //清除_one_m_agent_key
+                AgentKeyUtil.remove();
 			}
 		}
 	}
@@ -135,15 +138,18 @@ public final class SequenceSpace {
     private String getCharset(List<Tracker> from){
         if (from==null||from.size()==0) return null;
         for (Tracker tracker:from){
-            HttpRequestTracker httpRequestTracker = (HttpRequestTracker)tracker;
-            String reqClassName = httpRequestTracker.getInterceptedClassName();
-            if (reqClassName!=null){
-                reqClassName = reqClassName.replaceAll("/",".");
-            }
-            if (servletCharsetMap.containsKey(reqClassName)){
-                return servletCharsetMap.get(reqClassName);
-            } else {
-                return getCharset(tracker.getChildTrackers());
+            //增加判断避免空指针异常
+            if (tracker.getClass()==HttpRequestTracker.class){
+                HttpRequestTracker httpRequestTracker = (HttpRequestTracker)tracker;
+                String reqClassName = httpRequestTracker.getInterceptedClassName();
+                if (reqClassName!=null){
+                    reqClassName = reqClassName.replaceAll("/",".");
+                }
+                if (servletCharsetMap.containsKey(reqClassName)){
+                    return servletCharsetMap.get(reqClassName);
+                } else {
+                    return getCharset(tracker.getChildTrackers());
+                }
             }
         }
         return null;

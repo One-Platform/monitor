@@ -17,7 +17,9 @@ public class AgentKeyUtil {
     public synchronized static String getAgentKey(){
         return agentKeyThreadLocal.get();
     }
-
+    public synchronized static void remove(){
+        agentKeyThreadLocal.remove();
+    }
     /**
      * 获取 ONE_M_AGENT_KEY 如果没有，则创建一个放入treadLocal并将其返回。
      * @return
