@@ -41,7 +41,7 @@ public class OracleMonitorTask {
     /**
      * Spring注入该类后执行该方法
      */
-    @PostConstruct
+//    @PostConstruct     暂时停止ORACLE监控作业  2014-02-13
     public  void execute(){
         logger.info("启动Oracle监视器...");
         List<Info> infoList = (List<Info>) infoRepository.findAll();

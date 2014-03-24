@@ -4,7 +4,10 @@ import com.sinosoft.monitor.agent.JavaAgent;
 import com.sinosoft.monitor.agent.config.JavaAgentConfig;
 import com.sinosoft.monitor.agent.tracing.TrackerService;
 import com.sinosoft.monitor.agent.trackers.*;
+import com.sinosoft.monitor.agent.trackers.http.HttpRequestTracker;
 
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -26,6 +29,15 @@ public final class SequenceSpace {
 	public byte listenBlockFlag = -1;
 
     private long count=0;
+
+    private static Map<String,String> servletCharsetMap = JavaAgent.getInstance().getAgentConfig().getServletCharsetMap();
+
+    private static boolean needEncoding = false;
+    static {
+          if (servletCharsetMap!=null&&servletCharsetMap.size()>0){
+              needEncoding = true;
+          }
+    }
 
     public long getSize(){
         return count;
@@ -101,11 +113,41 @@ public final class SequenceSpace {
 			boolean pass = (this.listenBlockFlag != 1) || ((this.listenBlockFlag == 1) && (this.trackersPresent > 1));
 			if ((pass) && ((tracker instanceof RootTracker))) {
 				RootTracker rootTracker = (RootTracker) tracker;
-				rootTracker.computeFrictionTime((int) (System.currentTimeMillis() - this.workTime));
-				TrackerStore.add(rootTracker);
+
+                //新增转码 start
+                if (needEncoding && rootTracker.getClass()==HttpRequestTracker.class){
+                    //获取待转换字符编码
+                    String charset = getCharset(rootTracker.getChildTrackers());
+
+                    if (charset != null){
+                        JavaAgent.logger.info("rootTracker charset will be encoding to:"+charset);
+                        ((HttpRequestTracker)rootTracker).parseEncoding(charset);
+                    }
+                }
+                //新增转码 end
+
+                rootTracker.computeFrictionTime((int) (System.currentTimeMillis() - this.workTime));
+                TrackerStore.add(rootTracker);
 			}
 		}
 	}
+
+    private String getCharset(List<Tracker> from){
+        if (from==null||from.size()==0) return null;
+        for (Tracker tracker:from){
+            HttpRequestTracker httpRequestTracker = (HttpRequestTracker)tracker;
+            String reqClassName = httpRequestTracker.getInterceptedClassName();
+            if (reqClassName!=null){
+                reqClassName = reqClassName.replaceAll("/",".");
+            }
+            if (servletCharsetMap.containsKey(reqClassName)){
+                return servletCharsetMap.get(reqClassName);
+            } else {
+                return getCharset(tracker.getChildTrackers());
+            }
+        }
+        return null;
+    }
 
 	protected void updateDiscardFlag(String seqName) {
 		if (SequenceFilterByUrl.isSkip(seqName)) {

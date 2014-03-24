@@ -88,6 +88,7 @@ public class IndexController {
 		List<Map<String,Object>> rows = new ArrayList<Map<String,Object>>();
 		/* 查询数据库健康列表数据*/
         long start = System.currentTimeMillis();
+        //获取所有有效的应用
 		List<Application> applications = applicationService.findValidateApplication();
         long cost = System.currentTimeMillis()-start;
         logger.debug("applicationService.findValidateApplication() consumeTime："+cost);
@@ -111,10 +112,12 @@ public class IndexController {
 			cell.add(MessageUtils.formateMessage(MessageUtils.MESSAGE_FORMAT_A, url, application.getApplicationName()));
 			cell.add(MessageUtils.formateMessage(MessageUtils.MESSAGE_FORMAT_DIV, usabilityClass));
 			cell.add(MessageUtils.formateMessage(MessageUtils.MESSAGE_FORMAT_DIV, healthyClass));
+            String statisticDetailLink = "<a href=\"#\" onclick=\"showStatisticDetail('"+application.getId()+"')\">查看</a>";
+            cell.add(statisticDetailLink);
 			row.put("cell", cell);
 			rows.add(row);
 		}
-        cost = System.currentTimeMillis()-start;
+        cost = System.currentTimeMillis() - start;
         logger.debug("循环构建表格行数据："+cost);
         start = System.currentTimeMillis();
 		Map<String, Object> grid = new HashMap<String, Object>();

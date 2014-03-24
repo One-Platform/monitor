@@ -13,6 +13,7 @@ import com.sinosoft.monitor.agent.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -55,8 +56,10 @@ public class JavaAgentConfig implements JavaAgentConstants, LoggingConstants {
 	private int seqTraceStoreSize;
 	private int metricStoreMetricBucketSize;
 	private String agentCollectorConnectionURL;
+    private String monitor_agent_charset_servlets;
+    private Map<String,String> servletCharsetMap = new HashMap<String, String>();
 
-	public JavaAgentConfig(JavaAgent javaAgent) {
+    public JavaAgentConfig(JavaAgent javaAgent) {
 		init();
 		try {
 //			this.configListener = new AgentConfigListener(this, this.logger);
@@ -82,18 +85,33 @@ public class JavaAgentConfig implements JavaAgentConstants, LoggingConstants {
 				JavaAgentUtil.print(errMsg);
 				throw new RuntimeException(errMsg);
 			}
+
 		} catch (IOException e) {
 			String errMsg = "Exception occured(file might not exist) while loading "+MONITOR_AGENT_FILENAME+" in " + homePath;
 			throw new RuntimeException(errMsg);
 		}
 		initLogging(agentConfigProp);
+        monitor_agent_charset_servlets =agentConfigProp.getProperty(MONITOR_AGENT_CHARSET_SERVLETS);
+        try {
+            servletCharsetMap.clear();
+            //monitor.agent.charset.servlets=a.java:GBK,b.java:UTF-8
+            String[] servletCharsetArray = monitor_agent_charset_servlets.split(",");
+            for(int i=0;i<servletCharsetArray.length;i++){
+                String str = servletCharsetArray[i];
+                String[] arr = str.split(":");
+                servletCharsetMap.put(arr[0],arr[1]);
+            }
+            logger.info("servletCharsetMap:"+servletCharsetMap);
+        } catch (Throwable t){
+            logger.severe("when init JavaAgentConfig, parsing monitor.agent.charset.servlets to map error!");
+        }
         //初始化需要转JSON的类型的黑名单列表
         InvalidTypeStore.init(homePath+File.separator);
-		try {
-			Properties agentInfoProp = Utils.getContentAsProps(new File(homePath + File.separator + "apminsight.info"));
-			initAgentInfoValues(agentInfoProp);
-		} catch (IOException e) {
-		}
+//		try {
+//			Properties agentInfoProp = Utils.getContentAsProps(new File(homePath + File.separator + "apminsight.info"));
+//			initAgentInfoValues(agentInfoProp);
+//		} catch (IOException e) {
+//		}
 		this.logger.log(Level.INFO, "Monitor Agent config: {0}", agentConfigProp);
 		initAgentRuntimeConfig(agentConfigProp);
 		initAgentConfValues(agentConfigProp);
@@ -102,6 +120,10 @@ public class JavaAgentConfig implements JavaAgentConstants, LoggingConstants {
 		if (this.dryRun)
 			this.logger.info("Monitor Agent agent running in DRY RUN mode. Agent will run without communicating with the server/collector");
 	}
+
+    public Map<String,String> getServletCharsetMap(){
+        return servletCharsetMap;
+    }
 
 	private void initLogging(Properties agentConfigProp) {
 		String loggerName = LOGGER_NAME_DV;

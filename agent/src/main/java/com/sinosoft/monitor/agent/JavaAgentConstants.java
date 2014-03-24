@@ -35,7 +35,9 @@ public abstract interface JavaAgentConstants {
 	public static final String TRANSACTION_TRACEITEM_EXCLUDE_THRESHOLD = "transaction.traceitem.exclude.threshold";
 	public static final String TRANSACTION_TRACESTORE_SIZE = "transaction.tracestore.size";
 	public static final String METRICSTORE_METRIC_BUCKET_SIZE = "metricstore.metric.bucket.size";
-	public static final Boolean AGENT_ENABLED_DV = Boolean.TRUE;
+	public static final String MONITOR_AGENT_CHARSET_SERVLETS = "monitor.agent.charset.servlets";
+
+    public static final Boolean AGENT_ENABLED_DV = Boolean.TRUE;
 
 	public static final Float APDEX_THRESHOLD_DV = Float.valueOf(0.5F);
 

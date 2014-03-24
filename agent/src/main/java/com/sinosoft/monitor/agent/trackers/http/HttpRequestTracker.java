@@ -3,8 +3,6 @@ package com.sinosoft.monitor.agent.trackers.http;
 import com.sinosoft.monitor.agent.JavaAgent;
 import com.sinosoft.monitor.agent.config.JavaAgentConfig;
 import com.sinosoft.monitor.agent.store.AgentTraceStore;
-import com.sinosoft.monitor.agent.store.UrlTraceStore;
-import com.sinosoft.monitor.agent.store.UrlTraceStoreController;
 import com.sinosoft.monitor.agent.store.model.exception.ExceptionInfo;
 import com.sinosoft.monitor.agent.store.model.url.MethodTraceLog;
 import com.sinosoft.monitor.agent.store.model.url.UrlTraceLog;
@@ -15,18 +13,16 @@ import com.sinosoft.monitor.agent.util.SequenceURINormalizer;
 import com.sinosoft.monitor.agent.util.UUIDUtil;
 import com.sinosoft.monitor.com.alibaba.fastjson.JSON;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.logging.Level;
 
 public class HttpRequestTracker extends AbstractRootTracker {
 	private boolean hasUrlTrace;
 	protected Object[] args;
 	private String requestMethod;
-	private Map<String, String> requestParamMap;
+	private Map<String, Object> requestParamMap;
+    private String requestParamsString;
 	private String requestIp;
 	private String sessionId;
 
@@ -47,9 +43,6 @@ public class HttpRequestTracker extends AbstractRootTracker {
 
 			sessionId = request.getSessionId();
 
-//			System.out.println( "requestMethod :" + requestMethod + "  paramMap:" +
-//					requestParamMap + "  requestIP:" + requestIp + "  sessionId:" + sessionId);
-
 			uri = SequenceURINormalizer.normalizeURI(request.getRequestURI());
 		} catch (Exception ex) {
 			uri = "unknown";
@@ -58,6 +51,48 @@ public class HttpRequestTracker extends AbstractRootTracker {
 		this.seqName = ("" + uri);
 	}
 
+    public void parseEncoding(String charSet){
+        try{
+            //创建一个临时Map ,用于装载转码后的字符串
+            Map<String,Object> tempMap = new HashMap<String, Object>(requestParamMap.size());
+            Set<String> keySet = requestParamMap.keySet();
+
+            for(String key:keySet){
+
+                Object objValue = requestParamMap.get(key);
+                //如果value值不是字符串类型
+                if (objValue.getClass()!=String.class){
+                    //如果value值是字符串数组类型
+                    if(objValue.getClass()==String[].class){
+                        String[] values = (String[])objValue;
+                        int len = values.length;
+                        //创建一个新的字符串数组用来复制转码后的原有数组
+                        String[] newValues = new String[len];
+                        for(int i=0;i<len;i++){
+                            String value = values[i];
+                            String rs =  new String(value.getBytes("iso8859-1"), charSet);
+                            JavaAgent.logger.info(MessageFormat.format("-i[rs:{0}]", rs));
+                            newValues[i] = rs;
+                        }
+                        //向临时Map中装载数据
+                        tempMap.put(key,newValues);
+                    }
+                }
+                //如果value值是字符串类型
+                else {
+                    String value = (String)objValue;
+                    String rs =  new String(value.getBytes("iso8859-1"), charSet);
+                    JavaAgent.logger.info(MessageFormat.format("[rs:{0}]", rs));
+                    //向临时Map中装载数据
+                    tempMap.put(key,rs);
+                }
+            }
+            //将参数序列化成JSON格式然后赋值给requestParamsString
+            requestParamsString = JSON.toJSONString(tempMap);
+        } catch (Throwable t){
+            JavaAgent.logger.log(Level.SEVERE,this.getClass().getName(),t);
+        }
+    }
 	public String assignSequenceName() {
 
 		this.hasUrlTrace = true;
@@ -93,7 +128,12 @@ public class HttpRequestTracker extends AbstractRootTracker {
 			urlTrace.setUrl(seqName);
 			urlTrace.setId(UUIDUtil.getUUID());
 			urlTrace.setApplicationId(JavaAgentConfig.getAgentInstanceId());
-			urlTrace.setRequestParams(JSON.toJSONString(requestParamMap));
+            String jsonStr = requestParamsString;
+            if (requestParamsString==null){
+                jsonStr = JSON.toJSONString(requestParamMap);
+            }
+			urlTrace.setRequestParams(jsonStr);
+            JavaAgent.logger.info(MessageFormat.format("[url:{0},param:{1}]",seqName,jsonStr));
 			urlTrace.setSessionId(sessionId);
 			urlTrace.setUserIp(requestIp);
 

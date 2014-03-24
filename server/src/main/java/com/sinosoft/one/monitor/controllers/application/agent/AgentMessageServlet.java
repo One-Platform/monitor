@@ -83,7 +83,8 @@ public class AgentMessageServlet extends HttpServlet {
         }
         long end = System.currentTimeMillis();
         queue.offer(traceLog);
-        logger.debug("process data wrapper cost:"+(end-start)+"ms");
+        logger.debug("process data wrapper cost:" + (end - start) + "ms," + "ip:" + traceLog.getIp() + ",port:" + traceLog.getPort());
+        logger.debug("traceLog info:"+ JSON.toJSONString(traceLog));
         input.close();
         BufferedOutputStream output = new BufferedOutputStream(response.getOutputStream());
         output.write("Success".getBytes());
