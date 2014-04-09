@@ -254,7 +254,7 @@
                     <td><select id="monitorType" name="monitorType"  class="diySelect" style="width:200px">
                         <option value="">--选择一个监视器类型--</option>
                         <option value="APPLICATION">应用系统</option>
-                        <option value="DB">数据库</option>
+                        <%--<option value="DB">数据库</option>--%>
                         <%--<option value="OS">操作系统</option>--%>
                     </select></td>
                 </tr>

@@ -69,12 +69,12 @@ function hideNav(e){
                     	<li><a href="${ctx}/addmonitor/addapp">应用系统</a></li>
                     </ul>
                 </td>
-                <td width="33%" class="center">
-               	  <h3 class="title3">数据库</h3>
-                	<ul>
-                    	<li><a href="${ctx}/addmonitor/addoracle">Oracle</a></li>
-                    </ul>
-                </td>
+                <%--<td width="33%" class="center">--%>
+               	  <%--<h3 class="title3">数据库</h3>--%>
+                	<%--<ul>--%>
+                    	<%--<li><a href="${ctx}/addmonitor/addoracle">Oracle</a></li>--%>
+                    <%--</ul>--%>
+                <%--</td>--%>
                 <%--<td width="33%">--%>
                	  <%--<h3 class="title3">操作系统</h3>--%>
                 	<%--<ul>--%>
