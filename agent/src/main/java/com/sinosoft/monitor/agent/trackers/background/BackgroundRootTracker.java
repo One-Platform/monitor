@@ -3,8 +3,6 @@ package com.sinosoft.monitor.agent.trackers.background;
 import com.sinosoft.monitor.agent.JavaAgent;
 import com.sinosoft.monitor.agent.config.JavaAgentConfig;
 import com.sinosoft.monitor.agent.store.AgentTraceStore;
-import com.sinosoft.monitor.agent.store.UrlTraceStore;
-import com.sinosoft.monitor.agent.store.UrlTraceStoreController;
 import com.sinosoft.monitor.agent.store.model.exception.ExceptionInfo;
 import com.sinosoft.monitor.agent.store.model.url.MethodTraceLog;
 import com.sinosoft.monitor.agent.store.model.url.UrlTraceLog;
@@ -13,7 +11,7 @@ import com.sinosoft.monitor.agent.trackers.DefaultTracker;
 import com.sinosoft.monitor.agent.trackers.Tracker;
 import com.sinosoft.monitor.agent.util.UUIDUtil;
 
-import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -49,7 +47,9 @@ public class BackgroundRootTracker extends AbstractRootTracker {
 //		UrlTraceStore urlStore = UrlTraceStoreController.getUrlTraceStore();
 //		List<UrlTraceLog> urlTraces = urlStore.getUrlTrace(seqName);
 		UrlTraceLog urlTrace = new UrlTraceLog();
-		urlTrace.setConsumeTime(getDuration());
+        urlTrace.setOneMAgentKey(this.getOneMAgentKey());
+        JavaAgent.logger.info(MessageFormat.format("[url:{0},oneMAgentKey:{1}]", seqName,this.getOneMAgentKey()));
+        urlTrace.setConsumeTime(getDuration());
 		urlTrace.setBeginTime(new Date(getStartTime()));
 		urlTrace.setEndTime(new Date(getEndTime()));
 		urlTrace.setRecordTime(new Date());

@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public abstract interface Tracker {
+
+    void setOneMAgentKey(String oneMAgentKey);
+
+    String getOneMAgentKey();
+
 	public abstract long getStartTime();
 
 	public abstract long getEndTime();

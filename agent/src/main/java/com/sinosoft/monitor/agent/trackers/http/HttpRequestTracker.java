@@ -9,6 +9,7 @@ import com.sinosoft.monitor.agent.store.model.url.UrlTraceLog;
 import com.sinosoft.monitor.agent.trackers.AbstractRootTracker;
 import com.sinosoft.monitor.agent.trackers.DefaultTracker;
 import com.sinosoft.monitor.agent.trackers.Tracker;
+import com.sinosoft.monitor.agent.util.AgentKeyUtil;
 import com.sinosoft.monitor.agent.util.SequenceURINormalizer;
 import com.sinosoft.monitor.agent.util.UUIDUtil;
 import com.sinosoft.monitor.com.alibaba.fastjson.JSON;
@@ -44,13 +45,31 @@ public class HttpRequestTracker extends AbstractRootTracker {
 			sessionId = request.getSessionId();
 
 			uri = SequenceURINormalizer.normalizeURI(request.getRequestURI());
+
+            //rootTracker 创建ONE_M_KEY
+            String oneMAgentKey = request.getHeader(AgentKeyUtil.ONE_M_AGENT_KEY);
+
+            JavaAgent.logger.log(Level.INFO,"Request received _one_agent_key_:{0}",oneMAgentKey);
+
+            oneMAgentKey = genericOneMAgentKey(oneMAgentKey);
+
+            setOneMAgentKey(oneMAgentKey);
+
 		} catch (Exception ex) {
 			uri = "unknown";
 			JavaAgent.logger.log(Level.WARNING, "Exception while normalizing the url {0}", ex.getMessage());
 		}
 		this.seqName = ("" + uri);
 	}
-
+    private String genericOneMAgentKey(String oneMAgentKey){
+        //通过http获取oneMAgentKey
+        if (oneMAgentKey==null||"".equals(oneMAgentKey)){
+            oneMAgentKey = AgentKeyUtil.createOneMAgentKey();
+        } else {
+            AgentKeyUtil.setAgentKey(oneMAgentKey);
+        }
+        return oneMAgentKey;
+    }
     public void parseEncoding(String charSet){
         try{
             //创建一个临时Map ,用于装载转码后的字符串
@@ -121,6 +140,8 @@ public class HttpRequestTracker extends AbstractRootTracker {
 //			UrlTraceStore urlStore = UrlTraceStoreController.getUrlTraceStore();
 //			List<UrlTraceLog> urlTraces = urlStore.getUrlTrace(seqName);
 			UrlTraceLog urlTrace = new UrlTraceLog();
+            //增加监控生产戳
+            urlTrace.setOneMAgentKey(this.getOneMAgentKey());
 			urlTrace.setConsumeTime(getDuration());
 			urlTrace.setBeginTime(new Date(getStartTime()));
 			urlTrace.setEndTime(new Date(getEndTime()));
@@ -133,7 +154,7 @@ public class HttpRequestTracker extends AbstractRootTracker {
                 jsonStr = JSON.toJSONString(requestParamMap);
             }
 			urlTrace.setRequestParams(jsonStr);
-            JavaAgent.logger.info(MessageFormat.format("[url:{0},param:{1}]",seqName,jsonStr));
+            JavaAgent.logger.info(MessageFormat.format("[url:{0},param:{1},setOneMAgentKey:{2}]",seqName,jsonStr,this.getOneMAgentKey()));
 			urlTrace.setSessionId(sessionId);
 			urlTrace.setUserIp(requestIp);
 

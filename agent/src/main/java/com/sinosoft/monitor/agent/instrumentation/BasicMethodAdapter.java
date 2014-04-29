@@ -3,6 +3,8 @@ package com.sinosoft.monitor.agent.instrumentation;
 import com.sinosoft.monitor.agent.JavaAgent;
 import com.sinosoft.monitor.agent.JavaAgentHandler;
 import com.sinosoft.monitor.agent.instrumentation.interceptor.InterceptorDefinition;
+import com.sinosoft.monitor.agent.instrumentation.listener.AsmVisitMethodListener;
+import com.sinosoft.monitor.agent.instrumentation.listener.MethodCodeInserter;
 import com.sinosoft.monitor.agent.trackers.Tracker;
 import com.sinosoft.monitor.agent.util.InstrumentedMethod;
 import com.sinosoft.monitor.org.objectweb.asm.*;
@@ -23,7 +25,20 @@ public class BasicMethodAdapter extends AdviceAdapter implements Opcodes {
 	protected String pointCutName;
 	private Label startFinally = new Label();
 	private int tracerVarId;
-
+    private AsmVisitMethodListener axis2AbstractHttpSenderListener;
+    private MethodCodeInserter abstractHTTPSenderSetTimeoutsInserter = new MethodCodeInserter("org/apache/axis2/transport/http/AbstractHTTPSender", "setTimeouts", 0) {
+        @Override
+        public void insert(MethodVisitor mv) {
+            //aload 4
+            mv.visitVarInsn(ALOAD, 4);
+            //ldc "_one_m_agent_key_"
+            mv.visitLdcInsn("_one_m_agent_key_");
+            //invokestatic com/sinosoft/monitor/agent/util/AgentKeyUtil/createOneMAgentKey()Ljava/lang/String;
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/sinosoft/monitor/agent/util/AgentKeyUtil", "createOneMAgentKey", "()Ljava/lang/String;");
+            //invokeinterface org/apache/commons/httpclient/HttpMethod/addRequestHeader(Ljava/lang/String;Ljava/lang/String;)V 3
+            mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "org/apache/commons/httpclient/HttpMethod", "addRequestHeader", "(Ljava/lang/String;Ljava/lang/String;)V");
+        }
+    };
 	protected BasicMethodAdapter(ClassVisitor adapter, String className,
 	                             MethodVisitor mv,
 	                             int access, String methodName,
@@ -33,6 +48,7 @@ public class BasicMethodAdapter extends AdviceAdapter implements Opcodes {
 		this.className = className;
 		this.methodName = methodName;
 		this.pointCutName = matchedInterceptor.getClass().getName();
+        axis2AbstractHttpSenderListener = AsmVisitMethodListener.newInstance(mv,"org/apache/axis2/transport/http/AbstractHTTPSender","executeMethod");
 	}
 
 	public void visitCode() {
@@ -192,4 +208,12 @@ public class BasicMethodAdapter extends AdviceAdapter implements Opcodes {
 	public void loadNull() {
 		this.mv.visitInsn(1);
 	}
+
+
+    @Override
+    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+        super.visitMethodInsn(opcode, owner, name, desc);
+        axis2AbstractHttpSenderListener.visitMethodInsn(this.className, this.methodName,
+                opcode, owner, name,abstractHTTPSenderSetTimeoutsInserter);
+    }
 }
